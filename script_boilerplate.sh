@@ -46,9 +46,9 @@ LIGHTAQUA=`echo -en "\e[106m"`
 WHITE=`echo -en "\e[107m"`
 DEFAULT=`echo -en "\e[49m"`
 
-echo "${lightblue}*******************************$normal"
-echo "${lightblue}            test.sh            $normal"
-echo "${lightblue}*******************************$normal"
+echo "${lightblue}*********************************************$normal"
+echo "${lightblue}            script_boilerplate.sh            $normal"
+echo "${lightblue}*********************************************$normal"
 
 silent="false"
 
