@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#TODO: errorhandling with ${red}[error]$normal
-
 #colors
 bold=`echo -en "\e[1m"`
 underline=`echo -en "\e[4m"`
@@ -46,53 +44,73 @@ LIGHTAQUA=`echo -en "\e[106m"`
 WHITE=`echo -en "\e[107m"`
 DEFAULT=`echo -en "\e[49m"`
 
+helpmenu(){
+    echo "${purple}Usage:$normal ./script_boilerplate <option>"
+    echo ""
+    echo "-h        --help                    Display Help."
+    echo "-v        --verbose                 Verbose mode (-vv for more)."
+    echo "-V        --version                 Show version."
+    echo ""
+    exit
+}
+
+very_verbose=false
+verbose=false
+
+if [[ " $# " -ne 0 ]]; then
+    for i in $@
+    do
+        if [[ ${i} = "-h" || ${i} = "--help" ]]; then
+            helpmenu
+        elif [[ ${i} = "-v" || ${i} = "--verbose" ]]; then
+            verbose=true
+        elif [[ ${i} = "-vv" ]]; then
+            very_verbose=true
+        elif [[ ${i} = "-V" || ${i} = "--version" ]]; then
+            echo "script_boilerplate version 1.1.2"
+            exit
+        else
+            echo "${red}Error:$normal invalid argument: ${i}"
+            helpmenu
+            exit
+        fi
+    done
+# else
+#     echo "no args/flags provided"
+fi
+
+if ${very_verbose} || ${verbose} ; then
 echo "${lightblue}*********************************************$normal"
 echo "${lightblue}            script_boilerplate.sh            $normal"
 echo "${lightblue}*********************************************$normal"
+fi
 
-silent="false"
-
-usage() { echo -e "Usage: $0\n[-s <true|false>]                Silent mode\n[-p <string>]                    Test command\n[-h]                             Display this help message and exit" 1>&2; exit 1; }
-
-while getopts ":s:p" opt; do
-    case $opt in
-    s)
-        silent=${OPTARG}
-        ;;
-    p)
-        p=${OPTARG}
-        ;;
-    *)
-        usage
-        ;;
-
-    esac
-done
-shift $(( OPTIND - 1 ))
-[[ "${1}" == "--" ]] && shift
-
-#usage: mystix_exec "text" "cmd1" "cmd2" "cmd3" 
 mystix_exec(){
     text=$1
-    echo -n "${purple}$text.. $normal"
     anim="& while [ \$(ps a | awk '{print \$1}' | grep \$!) ] ; do for X in '-' '/' '|' '\'; do echo -en \"\b\$X\"; sleep 0.1; done; done; echo -en '\b '"
     shift
     for i in "$@";
     do
-        if ${silent} ; then
-            cmd_with_anim="$i > /dev/null 2>&1 $anim"
+        if ${very_verbose} || ${verbose} ; then
+            echo -n "${purple}$text.. $normal"
+            if ${very_verbose} ; then
+                echo
+                cmd="$i"
+            elif ${verbose} ; then
+                cmd="$i > /dev/null 2>&1 $anim"
+            fi
         else
-            echo
-            cmd_with_anim="$i"
+            cmd="$i > /dev/null 2>&1"
         fi
-        eval $cmd_with_anim
+        eval $cmd
+        if ${very_verbose} || ${verbose} ; then
+            echo "${green}[done]$normal"
+        fi
     done
-    echo "${green}[done]$normal"
 }
 
 mystix_exec "Just sleep for testing" \
             "sleep 2 && echo 'sleep 2s'"
 mystix_exec "Just sleep commands for testing" \
-            "sleep 2 && echo -n 'sleep 2s'" \
-            "sleep 2 && echo -n 'sleep 2s'" \
+            "sleep 2 && echo 'sleep 2s'" \
             "sleep 2 && echo 'sleep 2s'"
